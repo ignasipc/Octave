@@ -1,0 +1,13 @@
+function [A,b]=DeSELaTriangularSuperior(A,b)
+  [n,m]=size(b);
+  for k=1:n-1
+    for i=k+1:n
+      m=A(i,k)/A(k,k);
+      A(i,k)=0;
+      for j=k+1:n
+        A(i,j)=A(i,j)-m*A(k,j);
+      endfor
+      b(i,1)=b(i,1)-m*b(k,1);
+    endfor
+  endfor
+endfunction
