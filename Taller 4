@@ -1,0 +1,176 @@
+c = [1/100;1/50;1/10;1;2;5;10;100];
+b = [1;-1;1;-1;1;2;1;-1];
+
+exact_sol = [-89202397011858500/343184827942444257;
+             284742741343553165/9275265620066061;
+             -25810583238434097767/51997701203400645;
+             29985328840009119006959/11439494264748141900;
+             -6332936841882181293233/1271054918305349100;
+             5934214756682873188013/1906582377458023650;
+             -14214034409621076703/49026403991777751;
+             1233052285368734443/343184827942444257];
+
+display(c);
+display(b);
+
+Ac = vander(c);
+display(Ac);
+
+function [A,b]=Gauss(A,b);
+  [n,m]=size(b);
+  for k=1:n-1
+    for i=k+1:n
+      m=A(i,k)/A(k,k);
+      A(i,k)=0;
+      for j=k+1:n
+        A(i,j)=A(i,j)-m*A(k,j);
+      endfor
+      b(i,1)=b(i,1)-m*b(k,1);
+    endfor
+  endfor
+  display(b);
+endfunction
+
+function [x] = BackSubs(A,b);
+
+  %% n = numero de incógnitas
+
+  n=length(b);
+  x=zeros(n,1);
+
+  x(n, 1)=b(n)/A(n,n);
+
+  %%
+
+  for k=n-1:-1:1
+    S = b(k);
+
+    for i=k+1:1:n
+      S = S - A(k,i)*x(i);
+    endfor
+
+    x(k, 1)=S/A(k,k);
+  endfor
+endfunction
+
+function [A,b] = Gauss_pivot_col(A,b);
+ n=length(b);
+ for k = 1:n-1
+   mx = k;
+   for i = k+1:n
+     if abs(A(i,k) > abs(A(mx, k)))
+       mx = i;
+     endif
+     %Intercambio de filas k y mx
+     tmp = A(i,:);
+     A(i,:) = A(k,:);
+     A(k,:) = tmp;
+     tmp_b=b(i);
+     b(i) = b(k);
+     b(k)=tmp_b;
+   endfor
+   for i = k+1:n
+     m(i,k) = A(i,k)/A(k,k);
+     A(i,k) = 0;
+     for j=k+1:n
+       A(i,j) = A(i,j)-m(i,k)*A(k,j);
+     endfor
+     b(i) = b(i) - m(i,k)*b(k);
+   endfor
+  endfor
+endfunction
+
+function [newA, newb, perm] = gauss_maximal(A, b);
+  n = length(A);
+
+  solution = zeros(n, 0);
+  indexes = 1:n;
+
+  for row = 1:n#For throw row
+    #Look for max
+      max = {row, row};
+      for maxRow = row:n
+        for maxCol = row:n
+          if abs(A(maxRow, maxCol)) > abs(A(max{1}, max{2}))
+            max{1} = maxRow;
+            max{2} = maxCol;
+          endif
+        endfor
+      endfor
+
+      #Check if max = 0 them continue to next due to no necessary to make 0's
+      if A(max{1}, max{2} == 0)
+        continue;
+      endif
+
+      #Permute row
+      if max{1} ~= row
+        tmp = A(row, :);
+        A(row, :) = A(max{1}, :);
+        A(max{1}, :) = tmp;
+
+        tmp = b(row);
+        b(row) = b(max{1});
+        b(max{1}) = tmp;
+      endif
+
+      #Permute column
+      if max{2} != row
+
+        tmp = A(:, row);
+        A(:, row) = A(:, max{2});
+        A(:, max{2}) = tmp;
+        %Refelct column change
+        tmp = row;
+        indexes(row) = max{2};
+        indexes(max{2}) = tmp;
+      endif
+
+    for i = row + 1:n #For throw cols to divide throw 'lmb'
+      lmd = A(i, row) / A(row, row);
+      A(i, row) = 0;
+
+      #Loop to make zero's
+      for j = row + 1:n
+        A(i, j) = A(i, j) - (lmd * A(row, j));
+      endfor
+
+      b(i) = b(i) - (lmd * b(row));
+    endfor#Row + 1 use to make 0's
+  endfor#Row
+  newA = A;
+  newb = b;
+  perm = indexes;
+
+endfunction
+
+[Ac1,b1] = Gauss(Ac,b);
+display(Ac1);
+display(b1);
+
+x = BackSubs(Ac1,b1);
+display(x);
+
+[Ac2,b2] = Gauss_pivot_col(Ac,b);
+display(Ac2);
+display(b2);
+
+x2 = BackSubs(Ac2,b2);
+display(x2);
+
+[Ac3,b3,perm3] = gauss_maximal(Ac,b);
+display(Ac3);
+display(b3);
+display(perm3);
+
+x3 = BackSubs(Ac3,b3);
+display(x3);
+
+e1 = norm(exact_sol - x);
+display(e1);
+
+e2 = norm(exact_sol - x2);
+display(e2);
+
+e3 = norm(exact_sol - x3);
+display(e3);
