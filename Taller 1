@@ -1,0 +1,29 @@
+A=[1,1;0,1];
+display(A);
+
+b=[0;1];
+display(b);
+
+function [x] = ResolTriangularSuperior(A,b);
+
+  %% n = numero de incógnitas
+
+  n=length(b);
+  x=zeros(n,1);
+
+  x(n, 1)=b(n)/A(n,n);
+
+  for k=n-1:-1:1
+    S = b(k);
+
+    for i=k+1:1:n
+      S = S - A(k,i)*x(i);
+    endfor
+
+    x(k, 1)=S/A(k,k);
+  endfor
+endfunction
+
+
+sol = ResolTriangularSuperior (A,b);
+display(sol);
