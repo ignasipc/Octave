@@ -1,0 +1,155 @@
+c = [1/10; 2; 7; 10; 23; 31];
+b = [-1; 5; -7; -1; 1; 2];
+
+printf("\nc = \n");
+disp(c);
+printf("\nb = \n");
+disp(b);
+
+A = vander(c);
+
+printf("\nA = \n");
+disp(A);
+
+function [L, U] = LU_gauss(A)
+  n = length(A(1, :));
+  m = length(A(:, 1));
+
+  if n != m
+    print("La matriz debe de ser cuadrada");
+    return;
+  endif
+
+ L = zeros(n, 0);
+
+ for k = 1 : n - 1
+  for i = k + 1 : n
+    m = A(i,k) / A(k,k)
+    A(i,k) = 0;
+    L(i, k) = m;
+
+    for j = k + 1:n
+      A(i,j) = A(i,j) - m * A(k,j);
+    endfor
+  endfor
+ endfor
+
+ for i = 1 : n
+   L(i, i) = 1;
+ endfor
+
+ U = A;
+endfunction
+
+[L1, U1] = LU_gauss(A);
+
+printf("\nL1 = \n");
+disp(L1);
+printf("\nU1 = \n");
+disp(U1);
+
+function [L, U, P] = LU_columna(A)
+  n = length(A(1, :));
+  m = length(A(:, 1));
+
+  if n != m
+    print("La matriz debe de ser cuadrada");
+    return;
+  endif
+
+  U = A;
+  L = zeros(n);
+  P = eye(n);
+
+  for k = 1:n-1#Para la fila
+    #Buscar max
+      max = k;
+      for i = k + 1:n
+        if abs(U(i, k)) > abs(U(max, k))
+          max = i;
+        endif
+      endfor
+
+      #Comprobar si max = 0 luego continuar al siguiente debido a la no necesidad de hacer 0's
+      if U(max, k == 0)
+        continue;
+      endif
+
+      #Permutar filas
+      if max ~= k
+        tmp = U(k, :);
+        U(k, :) = U(max, :);
+        U(max, :) = tmp;
+
+        tmp = P(k, :);
+        P(k, :) = P(max, :);
+        P(max, :) = tmp;
+      endif
+
+    for i = k + 1:n #Para thk cols para dividir thk 'lmb'
+      L(i, k) = U(i, k) / U(k, k);
+      U(i, k) = 0;
+
+      #Bucle para hacer 0's
+      for j = k + 1:n
+        U(i, j) = U(i, j) - L(i, k) * U(k, j);
+      endfor
+
+    endfor#k + 1 para hacer 0's
+  endfor#k
+
+  #Hacer la identidad en L
+  L += eye(n);
+endfunction
+
+[L2, U2, P2] = LU_columna(A);
+
+printf("\nL2 = \n");
+disp(L2);
+printf("\nU2 = \n");
+disp(U2);
+printf("\nP2 = \n");
+disp(P2);
+
+function [x] = BackSubs(A,b);
+
+  %% n = numero de incógnitas
+
+  n=length(b);
+  x=zeros(n,1);
+
+  x(n, 1)=b(n)/A(n,n);
+
+  %%
+
+  for k=n-1:-1:1
+    S = b(k);
+
+    for i=k+1:1:n
+      S = S - A(k,i)*x(i);
+    endfor
+
+    x(k, 1)=S/A(k,k);
+  endfor
+endfunction
+
+PINV = inv(P2);
+LU = (L1*U1);
+PLU = (PINV*L2*U2);
+
+[x1] = BackSubs(LU,b);
+[x2] = BackSubs(PLU,b);
+
+printf("\nx = \n");
+disp(x1);
+printf("\nx2 = \n");
+disp(x2);
+
+x7 = [7; 7; 7; 7; 7; 7];
+b1 = LU*x7;
+b2 = PLU*x7;
+
+printf("\nb1 = \n");
+disp(b1);
+printf("\nb2 = \n");
+disp(b2);
